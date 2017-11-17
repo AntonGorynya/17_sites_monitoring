@@ -11,14 +11,13 @@ MIN_DAY_COUNT = 30
 def load_urls4check(path):
     with open(path, 'r') as check_urls:
         urls = check_urls.readlines()
+        urls = [url.strip() for url in urls]
     return urls
 
 
 def is_server_respond_with_200(url):
     responce = requests.get(url=url)
-    if responce.status_code == requests.codes.ok:
-        return True
-    return False
+    return responce.status_code == requests.codes.ok
 
 
 def get_domain_expiration_date(domain_name):
@@ -29,9 +28,7 @@ def get_domain_expiration_date(domain_name):
         time_delta = expire_date[0] - cur_date
     else:
         time_delta = expire_date - cur_date
-    if time_delta.days >= MIN_DAY_COUNT:
-        return True
-    return False
+    return time_delta.days >= MIN_DAY_COUNT
 
 
 def create_parser():
@@ -46,9 +43,9 @@ if __name__ == '__main__':
     path_to_urls_file = args.path
     check_urls = load_urls4check(path_to_urls_file)
     for url in check_urls:
-        url = url.strip()
         devided_url = tldextract.extract(url)
-        domain_name = devided_url.domain + '.' + devided_url.suffix
+        domain_name = '{}.{}'.format(devided_url.domain,
+                                     devided_url.suffix)
         if is_server_respond_with_200(url):
             print('\n{} is OK'.format(url))
         else:
